@@ -21,7 +21,7 @@ and an optional hidden image that slowly emerges from the falling code.
 - **Lightweight.** About 1–2 ms per 4K frame, and a single `.scr` file with no runtime to install —
   the WPF theme used by the settings window is embedded in it.
 
-| Hidden image: the 1730 silhouette at 20% strength | Amber with CRT scanlines |
+| Hidden image: the 1730 silhouette at 40% strength | Amber with CRT scanlines |
 |---|---|
 | ![A figure with an outstretched hand emerging from purple rain](docs/images/hidden-image.png) | ![Amber rain with scanlines](docs/images/amber-scanlines.png) |
 
