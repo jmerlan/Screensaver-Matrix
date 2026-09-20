@@ -36,7 +36,8 @@ namespace MatrixScreensaver
         {
             bool sizeChanged = settings.CharSize != _settings.CharSize || settings.CharWidth != _settings.CharWidth
                 || settings.ColumnSpacing != _settings.ColumnSpacing || settings.StrokeWeight != _settings.StrokeWeight;
-            bool imageChanged = settings.HiddenImage != _settings.HiddenImage || settings.ImagePath != _settings.ImagePath;
+            bool imageChanged = settings.HiddenImage != _settings.HiddenImage || settings.ImagePath != _settings.ImagePath
+                || settings.ImageSource != _settings.ImageSource;
             _settings = settings.Clone();
             if (sizeChanged || _rain == null) Rebuild();
             else
@@ -88,8 +89,8 @@ namespace MatrixScreensaver
         {
             _hiddenImage = null;
             if (_rain == null || !_settings.HiddenImage || _sizeMultiplier < 1f) return; // too small to see in the mini preview
-            if (!HiddenImage.HasImages(_settings.ImagePath)) return;
-            _hiddenImage = new HiddenImage(_settings.ImagePath, _rain.Columns, _rain.Rows, _rain.CellWidth, _rain.CellHeight, HiddenImageAlwaysOn);
+            if (!HiddenImage.HasImages(_settings)) return;
+            _hiddenImage = new HiddenImage(_settings, _rain.Columns, _rain.Rows, _rain.CellWidth, _rain.CellHeight, HiddenImageAlwaysOn);
         }
 
         private void OnTick(object sender, EventArgs e)

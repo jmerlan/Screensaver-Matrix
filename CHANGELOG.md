@@ -7,7 +7,10 @@ All notable changes to this project are documented here. The format is based on
 ## [Unreleased]
 
 ### Added
-- "Clear" button next to the hidden-image path to go back to the built-in skull.
+- Built-in hidden images to choose between with radio buttons: the "1730" silhouette (now the
+  default), a skull, an alien and the Triple Zero mark, plus "Custom…" for your own file or folder.
+- `tools/generate-assets.py`, which draws the built-in images.
+- "Clear" button next to the custom hidden-image path.
 
 ### Changed
 - Settings window rebuilt in WPF and styled with the TripleZeroLabs.Os2 theme, which is embedded in

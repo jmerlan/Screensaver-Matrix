@@ -44,7 +44,11 @@
   </Target>
 
   <ItemGroup>
+    <!-- Built-in hidden images, drawn by tools/generate-assets.py. -->
+    <EmbeddedResource Include="assets\1730.png" LogicalName="1730.png" />
     <EmbeddedResource Include="assets\skull.png" LogicalName="skull.png" />
+    <EmbeddedResource Include="assets\alien.png" LogicalName="alien.png" />
+    <EmbeddedResource Include="assets\triplezero.png" LogicalName="triplezero.png" />
   </ItemGroup>
 
 </Project>

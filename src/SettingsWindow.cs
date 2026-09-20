@@ -31,6 +31,9 @@ namespace MatrixScreensaver
         private readonly TextBox _imagePath;
         private readonly TextBlock _imagePathHint;
         private readonly Panel _imagePathPanel;
+        private readonly System.Collections.Generic.Dictionary<string, RadioButton> _imageSources =
+            new System.Collections.Generic.Dictionary<string, RadioButton>();
+        private FrameworkElement _imageSourceRow;
         private readonly Slider _speed, _size, _width, _spacing, _weight, _density, _trail, _scanlineStrength, _imageStrength;
         private bool _loading;
 
@@ -109,7 +112,7 @@ namespace MatrixScreensaver
                 + "High-contrast pictures (a bright subject on a dark background) work best.";
             options.Children.Add(_hiddenImage);
 
-            _imagePath = new TextBox { Width = 130, VerticalContentAlignment = VerticalAlignment.Center, ToolTip = "Leave empty to use the built-in skull." };
+            _imagePath = new TextBox { Width = 130, VerticalContentAlignment = VerticalAlignment.Center, ToolTip = "Used when Image is set to Custom." };
             _imagePath.TextChanged += (s, e) =>
             {
                 _imagePathHint.Visibility = _imagePath.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -119,19 +122,49 @@ namespace MatrixScreensaver
             };
             _imagePathHint = new TextBlock
             {
-                Text = "Built-in skull",
+                Text = "Pick a file or folder",
                 Margin = new Thickness(8, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 IsHitTestVisible = false,
             };
             _imagePathHint.SetResourceReference(TextBlock.ForegroundProperty, Os2ResourceKey.Brush.TextDisabled);
 
+            var sourcePanel = new StackPanel { Orientation = Orientation.Horizontal };
+            foreach (var (key, label) in new[]
+            {
+                (Settings.Source1730, "1730"),
+                (Settings.SourceSkull, "Skull"),
+                (Settings.SourceAlien, "Alien"),
+                (Settings.SourceTripleZero, "Triple Zero"),
+                (Settings.SourceCustom, "Custom…"),
+            })
+            {
+                string source = key;
+                var radio = new RadioButton
+                {
+                    Content = label,
+                    GroupName = "HiddenImageSource",
+                    Margin = new Thickness(0, 0, 14, 0),
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+                radio.Checked += (s, e) =>
+                {
+                    if (_loading) return;
+                    _settings.ImageSource = source;
+                    OnChanged();
+                };
+                _imageSources[source] = radio;
+                sourcePanel.Children.Add(radio);
+            }
+            _imageSourceRow = Row("Image:", sourcePanel);
+            options.Children.Add(_imageSourceRow);
+
             _imagePathPanel = new StackPanel { Orientation = Orientation.Horizontal };
             _imagePathPanel.Children.Add(new Grid { Children = { _imagePath, _imagePathHint }, Margin = new Thickness(0, 0, 6, 0) });
             _imagePathPanel.Children.Add(SmallButton("Image…", BrowseImageFile, Os2ResourceKey.Button.Secondary));
             _imagePathPanel.Children.Add(SmallButton("Folder…", BrowseImageFolder, Os2ResourceKey.Button.Secondary));
             _imagePathPanel.Children.Add(SmallButton("Clear", () => _imagePath.Text = "", Os2ResourceKey.Button.Flat, "Go back to the built-in skull."));
-            options.Children.Add(Row("Image or folder:", _imagePathPanel));
+            options.Children.Add(Row("Custom file/folder:", _imagePathPanel));
 
             _imageStrength = AddSlider(options, "Image strength:", Settings.MinImageStrength, Settings.MaxImageStrength, v => $"{v}%", v => _settings.ImageStrength = v);
 
@@ -298,6 +331,7 @@ namespace MatrixScreensaver
                 _settings.ScanlineStrength = s.ScanlineStrength;
                 _settings.HiddenImage = s.HiddenImage;
                 _settings.ImagePath = s.ImagePath;
+                _settings.ImageSource = s.ImageSource;
                 _settings.ImageStrength = s.ImageStrength;
                 _settings.AllMonitors = s.AllMonitors;
 
@@ -307,6 +341,7 @@ namespace MatrixScreensaver
                 _hiddenImage.IsChecked = s.HiddenImage;
                 _allMonitors.IsChecked = s.AllMonitors;
                 _imagePath.Text = s.ImagePath ?? "";
+                _imageSources[_imageSources.ContainsKey(s.ImageSource ?? "") ? s.ImageSource : Settings.Source1730].IsChecked = true;
 
                 SetSlider(_speed, s.Speed);
                 SetSlider(_size, s.CharSize);
@@ -338,7 +373,8 @@ namespace MatrixScreensaver
             _colorSwatch.Background = Brush(_settings.Color);
             _colorPanel.IsEnabled = !_settings.Rainbow;
             _scanlineStrength.IsEnabled = _settings.Scanlines;
-            _imagePathPanel.IsEnabled = _imageStrength.IsEnabled = _settings.HiddenImage;
+            _imageSourceRow.IsEnabled = _imageStrength.IsEnabled = _settings.HiddenImage;
+            _imagePathPanel.IsEnabled = _settings.HiddenImage && _settings.ImageSource == Settings.SourceCustom;
             _preview.ApplySettings(_settings);
         }
 
@@ -360,15 +396,21 @@ namespace MatrixScreensaver
                 Title = "Choose a hidden image",
                 Filter = "Images|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.tif;*.tiff|All files|*.*",
             };
-            if (dialog.ShowDialog(this) == true) _imagePath.Text = dialog.FileName;
+            if (dialog.ShowDialog(this) == true) SetCustomPath(dialog.FileName);
         }
 
         private void BrowseImageFolder()
         {
             using (var dialog = new WinForms.FolderBrowserDialog { Description = "Choose a folder of images — one is picked at random each time." })
             {
-                if (dialog.ShowDialog() == WinForms.DialogResult.OK) _imagePath.Text = dialog.SelectedPath;
+                if (dialog.ShowDialog() == WinForms.DialogResult.OK) SetCustomPath(dialog.SelectedPath);
             }
+        }
+
+        private void SetCustomPath(string path)
+        {
+            _imagePath.Text = path;
+            _imageSources[Settings.SourceCustom].IsChecked = true;
         }
 
         private void TestFullScreen()

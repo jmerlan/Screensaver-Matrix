@@ -98,4 +98,6 @@ gap before the next image. `MatrixRain` applies `strength × envelope × map` in
 Any single frame looks like normal rain. The image only emerges when your eye averages over several
 seconds.
 
-The built-in skull (`assets/skull.png`) is an embedded resource, and an empty image path selects it.
+The built-in images (`assets/skull.png`, `alien.png`, `triplezero.png`) are embedded resources, chosen
+by `Settings.ImageSource`; `"custom"` uses `Settings.ImagePath` instead. They are drawn by
+`tools/generate-assets.py` — bold shapes only, since one character cell is one pixel of the image.

@@ -40,7 +40,8 @@ namespace MatrixScreensaver
         {
             bool sizeChanged = settings.CharSize != _settings.CharSize || settings.CharWidth != _settings.CharWidth
                 || settings.ColumnSpacing != _settings.ColumnSpacing || settings.StrokeWeight != _settings.StrokeWeight;
-            bool imageChanged = settings.HiddenImage != _settings.HiddenImage || settings.ImagePath != _settings.ImagePath;
+            bool imageChanged = settings.HiddenImage != _settings.HiddenImage || settings.ImagePath != _settings.ImagePath
+                || settings.ImageSource != _settings.ImageSource;
             _settings = settings.Clone();
 
             if (sizeChanged || _rain == null) Rebuild();
@@ -75,8 +76,8 @@ namespace MatrixScreensaver
         private void CreateHiddenImage()
         {
             // Always-on in the preview so the strength slider can be judged.
-            _hiddenImage = _rain != null && _settings.HiddenImage && HiddenImage.HasImages(_settings.ImagePath)
-                ? new HiddenImage(_settings.ImagePath, _rain.Columns, _rain.Rows, _rain.CellWidth, _rain.CellHeight, alwaysOn: true)
+            _hiddenImage = _rain != null && _settings.HiddenImage && HiddenImage.HasImages(_settings)
+                ? new HiddenImage(_settings, _rain.Columns, _rain.Rows, _rain.CellWidth, _rain.CellHeight, alwaysOn: true)
                 : null;
         }
 

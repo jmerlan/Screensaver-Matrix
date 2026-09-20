@@ -11,8 +11,9 @@ and an optional hidden image that slowly emerges from the falling code.
   trails and shimmering glyphs.
 - **Highly configurable.** Color (presets, custom color, or rainbow), speed, character size, width and
   stroke weight, column spacing, density and trail duration.
-- **Hidden image.** A picture fades in and out of the rain, visible only if you stare. It uses a
-  built-in skull, your own image, or a random image from a folder.
+- **Hidden image.** A picture fades in and out of the rain, visible only if you stare. Choose a
+  built-in image (the 1730 silhouette, a skull, an alien or the Triple Zero mark), your own image, or a
+  random image from a folder.
 - **CRT scanlines** for an old-TV look.
 - **Multi-monitor.** Independent rain on every monitor, or only on the primary one.
 - **Sharp on every display.** Per-monitor DPI aware, so mixed 1080p, 1440p and 4K setups all render at
@@ -20,9 +21,9 @@ and an optional hidden image that slowly emerges from the falling code.
 - **Lightweight.** About 1–2 ms per 4K frame, and a single `.scr` file with no runtime to install —
   the WPF theme used by the settings window is embedded in it.
 
-| Hidden image (70% strength) | Amber with CRT scanlines |
+| Hidden image: the 1730 silhouette at full strength | Amber with CRT scanlines |
 |---|---|
-| ![A skull emerging from the rain](docs/images/hidden-image.png) | ![Amber rain with scanlines](docs/images/amber-scanlines.png) |
+| ![A figure with an outstretched hand emerging from purple rain](docs/images/hidden-image.png) | ![Amber rain with scanlines](docs/images/amber-scanlines.png) |
 
 ## Install
 
@@ -64,14 +65,18 @@ your unsaved settings; move the mouse or press a key to return.
 | Trail duration | How long each character stays visible after the leading character passes |
 | Bright white leading character | Highlights the head of each drop |
 | CRT scanlines / strength | Darkened horizontal lines across the characters |
-| Hidden image / strength | Image or folder to reveal (leave empty for the built-in skull), and how visible it is |
+| Hidden image / strength | Turns the effect on, and how visible it is |
+| Image | Which picture to reveal: **1730** (default), **Skull**, **Alien**, **Triple Zero**, or **Custom…** (your own file, or a folder to pick from at random) |
 | Show rain on all monitors | Otherwise only the primary monitor shows rain and the others go black |
 
 Settings are stored per user in `HKCU\Software\MatrixScreensaver`.
 
 **Tips for hidden images:** high-contrast pictures with a bright subject on a dark background work
 best. Each character acts as one "pixel", so fine detail is lost. Bold shapes and dark holes come
-through well.
+through well; thin outlines (like the Triple Zero mark) need a higher strength to read.
+
+The built-in images are drawn by [`tools/generate-assets.py`](tools/generate-assets.py) and embedded
+in the executable.
 
 ### Command line
 

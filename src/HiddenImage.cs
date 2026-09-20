@@ -16,8 +16,8 @@ namespace MatrixScreensaver
     /// </summary>
     internal sealed class HiddenImage
     {
-        /// <summary>Stand-in "file name" for the skull embedded in the executable.</summary>
-        private const string BuiltInSkull = "<built-in skull>";
+        /// <summary>Prefix marking a "file name" that is really an embedded resource.</summary>
+        private const string BuiltInPrefix = "built-in:";
 
         private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif", ".tiff" };
 
@@ -42,12 +42,11 @@ namespace MatrixScreensaver
         /// <summary>0..1 fade envelope for the current image.</summary>
         public float Amount { get; private set; }
 
-        /// <summary>An empty path means the built-in skull.</summary>
-        public static bool HasImages(string path) => FindFiles(path).Length > 0;
+        public static bool HasImages(Settings settings) => FindFiles(settings).Length > 0;
 
-        public HiddenImage(string path, int cols, int rows, int cellW, int cellH, bool alwaysOn)
+        public HiddenImage(Settings settings, int cols, int rows, int cellW, int cellH, bool alwaysOn)
         {
-            _files = FindFiles(path);
+            _files = FindFiles(settings);
             _cols = cols;
             _rows = rows;
             _cellW = cellW;
@@ -118,11 +117,15 @@ namespace MatrixScreensaver
             return map != null;
         }
 
-        private static string[] FindFiles(string path)
+        private static string[] FindFiles(Settings settings)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(path)) return new[] { BuiltInSkull };
+                if (settings.ImageSource != Settings.SourceCustom)
+                    return new[] { BuiltInPrefix + settings.ImageSource };
+
+                string path = settings.ImagePath;
+                if (string.IsNullOrWhiteSpace(path)) return new string[0];
                 if (File.Exists(path)) return new[] { path };
                 if (Directory.Exists(path))
                 {
@@ -145,7 +148,9 @@ namespace MatrixScreensaver
         {
             try
             {
-                using (var stream = file == BuiltInSkull ? OpenBuiltIn() : new MemoryStream(File.ReadAllBytes(file)))
+                using (var stream = file.StartsWith(BuiltInPrefix)
+                    ? OpenBuiltIn(file.Substring(BuiltInPrefix.Length))
+                    : new MemoryStream(File.ReadAllBytes(file)))
                 using (var image = Image.FromStream(stream))
                 {
                     ApplyExifRotation(image);
@@ -224,10 +229,10 @@ namespace MatrixScreensaver
             }
         }
 
-        private static Stream OpenBuiltIn()
+        private static Stream OpenBuiltIn(string name)
         {
             var copy = new MemoryStream();
-            using (var resource = typeof(HiddenImage).Assembly.GetManifestResourceStream("skull.png"))
+            using (var resource = typeof(HiddenImage).Assembly.GetManifestResourceStream(name + ".png"))
                 resource.CopyTo(copy);
             copy.Position = 0;
             return copy;

@@ -37,7 +37,8 @@ To build the installer as well, install [Inno Setup 6](https://jrsoftware.org/is
 | Path | Contents |
 |---|---|
 | `src/` | All C# source. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). |
-| `assets/` | Application icon and the built-in hidden image (embedded resource) |
+| `assets/` | Application icon and the built-in hidden images (embedded resources) |
+| `tools/` | `generate-assets.py`, which draws the built-in hidden images |
 | `installer/Matrix.iss` | Inno Setup script |
 | `docs/` | Architecture notes and README images |
 | `build.ps1` | Build script used locally and in CI |

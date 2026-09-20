@@ -21,6 +21,11 @@ namespace MatrixScreensaver
 
         public static readonly Color DefaultColor = Color.FromArgb(0, 255, 70);
 
+        /// <summary>Built-in hidden images (embedded in the executable), plus "custom".</summary>
+        public const string Source1730 = "1730", SourceSkull = "skull", SourceAlien = "alien",
+            SourceTripleZero = "triplezero", SourceCustom = "custom";
+        public static readonly string[] BuiltInSources = { Source1730, SourceSkull, SourceAlien, SourceTripleZero };
+
         public Color Color = DefaultColor;
         public bool Rainbow = false;
         public int Speed = 40;          // 1..100
@@ -31,7 +36,8 @@ namespace MatrixScreensaver
         public bool Scanlines = false;  // CRT-style horizontal lines
         public int ScanlineStrength = 50; // percent darkening of the scanline rows
         public bool HiddenImage = false;  // subtly reveal images in the rain
-        public string ImagePath = "";     // an image file or a folder of images
+        public string ImageSource = Source1730; // a built-in image, or "custom" to use ImagePath
+        public string ImagePath = "";     // custom: an image file or a folder of images
         public int ImageStrength = 35;    // how visible the hidden image is, percent
         public int Density = 50;        // 1..100
         public int TrailTime = 30;      // tenths of a second a character stays visible after the head passes
@@ -59,6 +65,12 @@ namespace MatrixScreensaver
                     s.ScanlineStrength = Clamp(ReadInt(key, "ScanlineStrength", s.ScanlineStrength), MinScanlineStrength, MaxScanlineStrength);
                     s.HiddenImage = ReadInt(key, "HiddenImage", 0) != 0;
                     s.ImagePath = key.GetValue("ImagePath") as string ?? "";
+                    // Settings saved before built-in images existed: a path meant "custom",
+                    // anything else falls in with the current default.
+                    s.ImageSource = key.GetValue("ImageSource") as string
+                        ?? (s.ImagePath.Length > 0 ? SourceCustom : Source1730);
+                    if (s.ImageSource != SourceCustom && Array.IndexOf(BuiltInSources, s.ImageSource) < 0)
+                        s.ImageSource = Source1730;
                     s.ImageStrength = Clamp(ReadInt(key, "ImageStrength", s.ImageStrength), MinImageStrength, MaxImageStrength);
                     s.Density = Clamp(ReadInt(key, "Density", s.Density), MinDensity, MaxDensity);
                     s.TrailTime = Clamp(ReadInt(key, "TrailTime", s.TrailTime), MinTrailTime, MaxTrailTime);
@@ -87,6 +99,7 @@ namespace MatrixScreensaver
                 key.SetValue("Scanlines", Scanlines ? 1 : 0, RegistryValueKind.DWord);
                 key.SetValue("ScanlineStrength", ScanlineStrength, RegistryValueKind.DWord);
                 key.SetValue("HiddenImage", HiddenImage ? 1 : 0, RegistryValueKind.DWord);
+                key.SetValue("ImageSource", ImageSource ?? SourceSkull, RegistryValueKind.String);
                 key.SetValue("ImagePath", ImagePath ?? "", RegistryValueKind.String);
                 key.SetValue("ImageStrength", ImageStrength, RegistryValueKind.DWord);
                 key.SetValue("Density", Density, RegistryValueKind.DWord);
