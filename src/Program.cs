@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace MatrixScreensaver
@@ -15,10 +18,12 @@ namespace MatrixScreensaver
         [STAThread]
         private static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveEmbeddedAssembly;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             var (mode, hwnd) = ParseArgs(args);
+            Native.SetDpiAwareness(perMonitor: mode == 's' || mode == 'p');
             var settings = Settings.Load();
 
             switch (mode)
@@ -31,12 +36,36 @@ namespace MatrixScreensaver
                     if (hwnd != IntPtr.Zero) Application.Run(new ScreenSaverForm(hwnd, settings));
                     break;
                 default:
-                    using (var form = new SettingsForm(settings))
-                    {
-                        if (hwnd != IntPtr.Zero) form.ShowDialog(new Win32Window(hwnd));
-                        else Application.Run(form);
-                    }
+                    ShowSettings(settings, hwnd);
                     break;
+            }
+        }
+
+        /// <summary>Kept out of Main so the WPF settings window's types are only resolved
+        /// after <see cref="ResolveEmbeddedAssembly"/> is hooked up.</summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ShowSettings(Settings settings, IntPtr owner)
+        {
+            // A real Application (rather than Window.ShowDialog) so that hiding the window during
+            // "Test full screen" doesn't end the message loop and quit.
+            var app = new System.Windows.Application { ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown };
+            var window = new SettingsWindow(settings);
+            window.Closed += (s, e) => app.Shutdown();
+            if (owner != IntPtr.Zero) new System.Windows.Interop.WindowInteropHelper(window).Owner = owner;
+            app.Run(window);
+        }
+
+        /// <summary>The theme library is embedded in this executable so the .scr stays a single
+        /// file; load it from resources when the CLR asks for it.</summary>
+        private static Assembly ResolveEmbeddedAssembly(object sender, ResolveEventArgs args)
+        {
+            string name = new AssemblyName(args.Name).Name + ".dll";
+            using (var stream = typeof(Program).Assembly.GetManifestResourceStream(name))
+            {
+                if (stream == null) return null;
+                var bytes = new byte[stream.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                return Assembly.Load(bytes);
             }
         }
 

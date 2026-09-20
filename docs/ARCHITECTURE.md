@@ -12,7 +12,8 @@ Program.cs          parses /s /c /p, loads Settings, picks a mode
  │        │    └─ GlyphAtlas  pre-rendered glyph coverage masks
  │        ├─ HiddenImage   loads/fades the hidden image, exposes a per-cell brightness map
  │        └─ DibSurface    GDI DIB section that MatrixRain writes pixels into
- └─ SettingsForm     settings dialog; hosts a MatrixView as a live preview
+ └─ SettingsWindow   WPF window (built in code, themed with TripleZeroLabs.Os2)
+     └─ MatrixPreview  live preview; draws through BitmapSurface (a WPF WriteableBitmap)
 Settings.cs         all options, persisted to HKCU\Software\MatrixScreensaver
 Native.cs           Win32 P/Invoke declarations
 ```
@@ -28,8 +29,26 @@ Windows starts a `.scr` with:
   `WS_CHILD`. A watchdog timer exits when the parent window disappears.
 - `/c[:hwnd]` or nothing: the settings dialog, optionally owned by the given window.
 
-The app is per-monitor DPI aware (PerMonitorV2, declared in `app.manifest`). Every monitor is rendered
-at native resolution, and the character size is scaled by each window's DPI (`GetDpiForWindow`).
+DPI awareness is chosen per mode in `Native.SetDpiAwareness`, before any window exists:
+
+- `/s` and `/p` use **PerMonitorV2**, so every monitor renders at native resolution and the character
+  size scales with each window's DPI (`GetDpiForWindow`).
+- `/c` uses **system awareness**, because .NET Framework WPF lays windows out at 96 DPI under
+  per-monitor awareness, which mis-sizes the settings window on scaled displays.
+
+## Surfaces
+
+`MatrixRain` draws into an `IPixelSurface` — a 32-bit pixel buffer with a stride. Two implementations:
+`DibSurface` (a GDI DIB section, BitBlt'd to the screensaver windows) and `BitmapSurface` (a WPF
+`WriteableBitmap` for the settings preview, locked around each frame).
+
+## Theme
+
+`SettingsWindow` applies the theme per window with `Os2Theme.Apply(this)`, so standard WPF controls
+pick up its implicit styles. The theme assembly is embedded in the executable as a resource and
+resolved on demand by `Program.ResolveEmbeddedAssembly`, which keeps the `.scr` a single file. The
+window runs on its own `Application` with `ShutdownMode.OnExplicitShutdown`, so hiding it for
+"Test full screen" doesn't end the message loop.
 
 ## Rendering
 

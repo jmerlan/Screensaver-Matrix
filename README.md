@@ -17,7 +17,8 @@ and an optional hidden image that slowly emerges from the falling code.
 - **Multi-monitor.** Independent rain on every monitor, or only on the primary one.
 - **Sharp on every display.** Per-monitor DPI aware, so mixed 1080p, 1440p and 4K setups all render at
   native resolution.
-- **Lightweight.** About 1–2 ms per 4K frame, a single ~150 KB `.scr` file, and no runtime to install.
+- **Lightweight.** About 1–2 ms per 4K frame, and a single `.scr` file with no runtime to install —
+  the WPF theme used by the settings window is embedded in it.
 
 | Hidden image (70% strength) | Amber with CRT scanlines |
 |---|---|
@@ -109,6 +110,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how the code is organized and how to 
   seconds after the screensaver starts, and each image fades in over about 10 seconds.
 - **SmartScreen warning.** The installer and `.scr` are not code signed. Builds from this repository's
   source are safe to run; verify the release checksum if in doubt.
+
+## Third-party components
+
+The settings window is styled with [TripleZeroLabs.Os2](https://www.nuget.org/packages/TripleZeroLabs.Os2),
+a WPF theme by Triple Zero Labs, LLC (MIT + Commons Clause). It is embedded in `Matrix.scr` at build
+time. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Contributing
 

@@ -23,7 +23,8 @@ namespace MatrixScreensaver
             public int LastRow = -1;
         }
 
-        private readonly DibSurface _surface;
+        private readonly IPixelSurface _surface;
+        private readonly int _stride;
         private readonly GlyphAtlas _atlas;
         private readonly int _cols, _rows;
         private readonly Random _rng = new Random();
@@ -53,9 +54,10 @@ namespace MatrixScreensaver
         public int CellWidth => _atlas.CellW;
         public int CellHeight => _atlas.CellH;
 
-        public MatrixRain(Settings settings, DibSurface surface, int fontPx)
+        public MatrixRain(Settings settings, IPixelSurface surface, int fontPx)
         {
             _surface = surface;
+            _stride = surface.Stride;
             _fontPx = fontPx;
             _rowScale = new int[surface.Height];
             // Stroke weight 10 adds an outline ~1/8 of the character size.
@@ -205,6 +207,7 @@ namespace MatrixScreensaver
         {
             float k = _imageInfluence;
             var map = _imageMap;
+            int* bits = _surface.Bits;
             fixed (byte* masks = _atlas.Masks)
             {
                 for (int r = 0; r < _rows; r++)
@@ -229,13 +232,13 @@ namespace MatrixScreensaver
                         _dirty[i] = false;
 
                         byte* mask = level == 0 ? null : masks + _glyph[i] * _atlas.CellW * _atlas.CellH;
-                        DrawCell(c, r, mask, _palettes[c][level]);
+                        DrawCell(bits, c, r, mask, _palettes[c][level]);
                     }
                 }
             }
         }
 
-        private void DrawCell(int col, int row, byte* mask, int color)
+        private void DrawCell(int* bits, int col, int row, byte* mask, int color)
         {
             int cellW = _atlas.CellW, cellH = _atlas.CellH;
             int x0 = col * cellW, y0 = row * cellH;
@@ -243,8 +246,8 @@ namespace MatrixScreensaver
             int h = Math.Min(cellH, _surface.Height - y0);
             if (w <= 0 || h <= 0) return;
 
-            int stride = _surface.Width;
-            int* dst = _surface.Bits + y0 * stride + x0;
+            int stride = _stride;
+            int* dst = bits + y0 * stride + x0;
 
             if (mask == null)
             {

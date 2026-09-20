@@ -9,6 +9,14 @@ All notable changes to this project are documented here. The format is based on
 ### Added
 - "Clear" button next to the hidden-image path to go back to the built-in skull.
 
+### Changed
+- Settings window rebuilt in WPF and styled with the TripleZeroLabs.Os2 theme, which is embedded in
+  the `.scr` so it stays a single self-contained file.
+- The live preview renders into a WPF bitmap; the renderer now draws through an `IPixelSurface`
+  shared with the screensaver's GDI surface.
+- DPI awareness is set per mode at runtime instead of in the manifest: per-monitor for the
+  screensaver, system-aware for the settings window.
+
 ## [1.0.0] - 2026-09-19
 
 ### Added

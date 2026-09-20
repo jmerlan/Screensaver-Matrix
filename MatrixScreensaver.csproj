@@ -22,7 +22,26 @@
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
+    <!-- WPF, for the themed settings window. -->
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- The theme is embedded into the .scr (see Program.ResolveEmbeddedAssembly), so the
+         screensaver stays a single self-contained file. ExcludeAssets keeps it out of bin\. -->
+    <PackageReference Include="TripleZeroLabs.Os2" Version="0.1.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <Target Name="EmbedThemeAssembly" AfterTargets="ResolveAssemblyReferences" BeforeTargets="SplitResourcesByCulture">
+    <ItemGroup>
+      <EmbeddedResource Include="@(ReferencePath)" Condition="'%(Filename)' == 'TripleZeroLabs.Os2'">
+        <LogicalName>TripleZeroLabs.Os2.dll</LogicalName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
 
   <ItemGroup>
     <EmbeddedResource Include="assets\skull.png" LogicalName="skull.png" />

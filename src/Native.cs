@@ -62,6 +62,31 @@ namespace MatrixScreensaver
         [DllImport("winmm.dll")] public static extern uint timeBeginPeriod(uint period);
         [DllImport("winmm.dll")] public static extern uint timeEndPeriod(uint period);
 
+        private static readonly IntPtr DpiAwarenessPerMonitorV2 = new IntPtr(-4);
+        private static readonly IntPtr DpiAwarenessSystem = new IntPtr(-2);
+
+        [DllImport("user32.dll")] private static extern bool SetProcessDpiAwarenessContext(IntPtr value);
+        [DllImport("user32.dll")] private static extern bool SetProcessDPIAware();
+
+        /// <summary>
+        /// Per-monitor awareness lets the screensaver render at each monitor's native resolution.
+        /// The WPF settings window gets system awareness instead: .NET Framework WPF lays windows
+        /// out at 96 DPI under per-monitor awareness, which clips them on scaled displays.
+        /// Must be called before any window exists.
+        /// </summary>
+        public static void SetDpiAwareness(bool perMonitor)
+        {
+            try
+            {
+                if (SetProcessDpiAwarenessContext(perMonitor ? DpiAwarenessPerMonitorV2 : DpiAwarenessSystem)) return;
+            }
+            catch (EntryPointNotFoundException)
+            {
+                // Windows 8.1 or older: fall through to the legacy call.
+            }
+            try { SetProcessDPIAware(); } catch (EntryPointNotFoundException) { }
+        }
+
         public static float GetDpiScale(IntPtr hWnd)
         {
             try

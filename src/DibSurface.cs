@@ -5,11 +5,12 @@ namespace MatrixScreensaver
     /// <summary>
     /// A 32-bit top-down GDI DIB section we can write pixels into directly and BitBlt to a window.
     /// </summary>
-    internal sealed unsafe class DibSurface : IDisposable
+    internal sealed unsafe class DibSurface : IPixelSurface, IDisposable
     {
-        public readonly int Width;
-        public readonly int Height;
-        public readonly int* Bits;
+        public int Width { get; }
+        public int Height { get; }
+        public int Stride => Width; // DIB sections created here are 32bpp with no row padding
+        public int* Bits { get; }
 
         private IntPtr _dc;
         private IntPtr _bitmap;

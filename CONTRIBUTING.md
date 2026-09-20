@@ -47,13 +47,19 @@ To build the installer as well, install [Inno Setup 6](https://jrsoftware.org/is
 - **Target .NET Framework 4.8** so the `.scr` runs on any Windows 10/11 machine with nothing extra to
   install. Newer C# language features are fine (`LangVersion` is `latest`), but you can't use
   newer .NET APIs such as `Math.Clamp` or `Array.Fill`.
-- **Keep it dependency-free.** No NuGet runtime packages, so the screensaver stays a single file.
+- **Keep the output a single file.** The one NuGet dependency (the `TripleZeroLabs.Os2` WPF theme) is
+  embedded into the executable by the `EmbedThemeAssembly` target and loaded through
+  `Program.ResolveEmbeddedAssembly`. Anything else you add must be embedded the same way, or the
+  screensaver breaks when `Matrix.scr` is copied to System32 on its own.
 - **Performance matters.** The render loop runs 60 times a second on every monitor. Avoid allocations
   and GDI+ calls in `MatrixRain.Update`/`Render`. Check 4K performance when changing them.
 - **New settings** need all of the following: a field with default and min/max in `Settings.cs`,
-  `Load`/`Save` entries (clamp on load), a control in `SettingsForm` (including `LoadControls`), and a
+  `Load`/`Save` entries (clamp on load), a control in `SettingsWindow` (including `LoadControls`), and a
   row in the README settings table. If the setting affects glyph geometry, add it to the
-  `sizeChanged` check in `MatrixView.ApplySettings`.
+  `sizeChanged` check in both `MatrixView.ApplySettings` and `MatrixPreview.ApplySettings`.
+- **The settings window is WPF** (built in code, no XAML) and themed with `Os2Theme.Apply`; the
+  screensaver windows themselves stay WinForms. Prefer theme resource keys (`Os2ResourceKey.*`) over
+  hard-coded colours.
 - Match the existing code style. `.editorconfig` covers the basics.
 
 ## Testing checklist
@@ -61,7 +67,7 @@ To build the installer as well, install [Inno Setup 6](https://jrsoftware.org/is
 There are no automated UI tests. Before opening a pull request, please check:
 
 - [ ] `.\build.ps1` succeeds with no warnings
-- [ ] Settings dialog: every control updates the live preview; **OK** saves and **Cancel** discards
+- [ ] Settings window: every control updates the live preview; **OK** saves and **Cancel** discards
 - [ ] **Test full screen** covers every monitor and exits on mouse move or key press
 - [ ] The Windows Screen Saver Settings thumbnail preview renders and stops when the dialog closes
 - [ ] If you touched rendering: check at 100% and 150%+ display scaling, and on a 4K monitor if you
