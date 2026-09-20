@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Matrix</AssemblyName>
+    <RootNamespace>MatrixScreensaver</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets\matrix.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Product>Matrix Screensaver</Product>
+    <AssemblyTitle>Matrix Screensaver</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <Authors>Jay Merlan</Authors>
+    <Copyright>Copyright (c) 2026 Jay Merlan</Copyright>
+    <Description>Digital rain screensaver for Windows</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="assets\skull.png" LogicalName="skull.png" />
+  </ItemGroup>
+
+</Project>

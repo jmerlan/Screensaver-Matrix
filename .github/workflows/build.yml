@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build screensaver and installer
+        shell: pwsh
+        run: ./build.ps1 -Installer
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: matrix-screensaver
+          path: |
+            dist/Matrix.scr
+            dist/MatrixScreensaverSetup-*.exe
